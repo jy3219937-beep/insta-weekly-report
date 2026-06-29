@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>카테고리별 추이 — 정율학원 인스타그램 광고</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f4f5f7;
+    color: #1f2937;
+    line-height: 1.5;
+    padding: 32px 16px;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* Nav */
+  .top-nav {
+    background: #fff;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .top-nav a {
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .top-nav a:hover { background: #f3f4f6; }
+  .top-nav a.active { background: #4f46e5; color: #fff; }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, #0891b2 0%, #4f46e5 100%);
+    color: #fff;
+    padding: 28px 32px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 14px rgba(8,145,178,0.25);
+  }
+  .report-header h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; }
+  .report-header .meta { font-size: 13px; opacity: 0.92; }
+
+  /* Category tabs */
+  .cat-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    background: #fff;
+    padding: 8px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .cat-tabs a {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #4b5563;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .cat-tabs a:hover { background: #f3f4f6; }
+
+  /* Category section */
+  .cat-section {
+    background: #fff;
+    padding: 28px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    scroll-margin-top: 16px;
+  }
+  .cat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .cat-header h2 { font-size: 20px; color: #111827; }
+  .cat-header .count { font-size: 13px; color: #6b7280; }
+
+  /* Trend cards */
+  .trend-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .trend-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .trend-card .seq-tag {
+    background: #4f46e5;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    align-self: flex-start;
+    margin: 10px 10px 0;
+    border-radius: 6px;
+  }
+  .trend-card.organic .seq-tag { background: #059669; }
+  .trend-card.placeholder .seq-tag { background: #9ca3af; }
+  .trend-card .thumb {
+    width: 100%;
+    aspect-ratio: 9/12;
+    background: #e5e7eb;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .trend-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .trend-card .info { padding: 12px 14px; }
+  .trend-card .title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+  }
+  .trend-card .sub {
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 10px;
+  }
+  .trend-card .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .trend-card .stats .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px dashed #e5e7eb;
+  }
+  .trend-card .stats .row .k { color: #6b7280; }
+  .trend-card .stats .row .v { color: #111827; font-weight: 600; }
+  .trend-card .stats .row .v.signup { color: #16a34a; }
+  .trend-card .stats .row .v.fail { color: #b91c1c; }
+
+  .trend-card.placeholder {
+    border: 2px dashed #d1d5db;
+    background: #fafafa;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af;
+    font-size: 13px;
+  }
+  .trend-card.placeholder .seq-tag { margin: 0 0 12px 0; align-self: center; }
+
+  /* Comparison row */
+  .compare-table {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .compare-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .compare-table thead {
+    background: #f9fafb;
+  }
+  .compare-table th, .compare-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .compare-table th {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 700;
+  }
+  .compare-table td.metric-name { color: #374151; font-weight: 600; width: 120px; }
+  .compare-table td.value { color: #111827; font-weight: 600; }
+  .compare-table td.delta {
+    font-weight: 700;
+    font-size: 12px;
+    width: 140px;
+  }
+  .compare-table td.delta.up { color: #16a34a; }
+  .compare-table td.delta.down { color: #dc2626; }
+  .compare-table td.delta.neutral { color: #6b7280; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr.highlight { background: #fefce8; }
+
+  .insight-note {
+    background: #f0f9ff;
+    border-left: 3px solid #0ea5e9;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #075985;
+    line-height: 1.65;
+  }
+  .insight-note strong { color: #0c4a6e; display: block; margin-bottom: 4px; }
+
+  @media (max-width: 768px) {
+    .compare-table td.delta { width: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-nav">
+    <a href="index.html">📊 이번 주 보고서</a>
+    <a href="trends.html" class="active">📈 카테고리별 추이</a>
+  </div>
+
+  <div class="report-header">
+    <h1>카테고리별 영상 추이 분석</h1>
+    <div class="meta">썸머 · 약술 · 아하포인트 — 회차별 비교를 통해 어떤 포맷이 어떤 방향으로 변하고 있는지 추적합니다.</div>
+  </div>
+
+  <div class="cat-tabs">
+    <a href="#summer">☀️ 썸머</a>
+    <a href="#yaksul">📚 약술</a>
+    <a href="#aha">💡 아하포인트</a>
+  </div>
+
+  <!-- 썸머 -->
+  <section class="cat-section" id="summer">
+    <div class="cat-header">
+      <h2>☀️ 썸머 영상</h2>
+      <span class="count">총 1편 · 신규 1편 제작 예정</span>
+    </div>
+
+    <div class="trend-row">
+      <div class="trend-card">
+        <span class="seq-tag">1차</span>
+        <div class="thumb"><img src="thumb_썸머.png" alt="썸머 1차"></div>
+        <div class="info">
+          <div class="title">WARNING — 이렇게 보내면 망합니다</div>
+          <div class="sub">광고 집행 4일 · 첫 썸머 영상</div>
+          <div class="stats">
+            <div class="row"><span class="k">광고비</span><span class="v">128,426원</span></div>
+            <div class="row"><span class="k">조회수</span><span class="v">16,000</span></div>
+            <div class="row"><span class="k">좋아요</span><span class="v">19</span></div>
+            <div class="row"><span class="k">댓글</span><span class="v">0</span></div>
+            <div class="row"><span class="k">공유</span><span class="v">22</span></div>
+            <div class="row"><span class="k">저장</span><span class="v">12</span></div>
+            <div class="row"><span class="k">웹방문</span><span class="v">405</span></div>
+            <div class="row"><span class="k">프로필 방문</span><span class="v">86</span></div>
+            <div class="row"><span class="k">신청</span><span class="v fail">0팀</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trend-card placeholder">
+        <span class="seq-tag">2차 예정</span>
+        <div>
+          <strong style="display:block; color:#374151; margin-bottom:6px;">7월 4일 제작 예정</strong>
+          1차 영상이 인게이지먼트는 좋았지만 신청 0팀에 그친 한계를 보완하여,<br>
+          후킹 다음에 "신청 시 얻는 것"을 명확히 제시하는 구조로 재제작합니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-note">
+      <strong>현재 상태</strong>
+      썸머 카테고리는 아직 1편뿐이라 추이 비교 불가합니다. 7월 4일 신규 영상이 업로드되면 다음 주부터 본격 추이 분석이 가능해질 것 같습니다.
+    </div>
+  </section>
+
+  <!-- 약술 -->
+  <section class="cat-section" id="yaksul">
+    <div class="cat-header">
+      <h2>📚 약술 영상</h2>
+      <span class="count">총 2편 · 신규 1편 제작 예정 (7월 8일 가천대 약술 설명회)</span>
+    </div>
+
+    <div class="trend-row">
+      <div class="trend-card">
+        <span class="seq-tag">1차</span>
+        <div class="thumb"><img src="thumb_약술.png" alt="약술 1차"></div>
+        <div class="info">
+          <div class="title">수능이 두려운 너에게</div>
+          <div class="sub">광고 집행 5일 · 첫 약술 영상</div>
+          <div class="stats">
+            <div class="row"><span class="k">광고비</span><span class="v">173,437원</span></div>
+            <div class="row"><span class="k">조회수</span><span class="v">29,000</span></div>
+            <div class="row"><span class="k">좋아요</span><span class="v">–</span></div>
+            <div class="row"><span class="k">댓글</span><span class="v">1</span></div>
+            <div class="row"><span class="k">공유</span><span class="v">32</span></div>
+            <div class="row"><span class="k">저장</span><span class="v">14</span></div>
+            <div class="row"><span class="k">웹방문</span><span class="v">769</span></div>
+            <div class="row"><span class="k">프로필 방문</span><span class="v">–</span></div>
+            <div class="row"><span class="k">신청</span><span class="v signup">3팀</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <span class="seq-tag">2차</span>
+        <div class="thumb"><img src="thumb_약술2차.png" alt="약술 2차"></div>
+        <div class="info">
+          <div class="title">이제 남은 시간 D-1</div>
+          <div class="sub">광고 집행 1일 · 마감 단기 푸시 영상</div>
+          <div class="stats">
+            <div class="row"><span class="k">광고비</span><span class="v">23,063원</span></div>
+            <div class="row"><span class="k">조회수</span><span class="v">3,033</span></div>
+            <div class="row"><span class="k">좋아요</span><span class="v">4</span></div>
+            <div class="row"><span class="k">댓글</span><span class="v">0</span></div>
+            <div class="row"><span class="k">공유</span><span class="v">2</span></div>
+            <div class="row"><span class="k">저장</span><span class="v">–</span></div>
+            <div class="row"><span class="k">웹방문</span><span class="v">50</span></div>
+            <div class="row"><span class="k">프로필 방문</span><span class="v">31</span></div>
+            <div class="row"><span class="k">신청</span><span class="v fail">0팀</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trend-card placeholder">
+        <span class="seq-tag">3차 예정</span>
+        <div>
+          <strong style="display:block; color:#374151; margin-bottom:6px;">7월 8일 제작 예정</strong>
+          김일태 팀장님 — 가천대 약술 설명회.<br>
+          신청을 만들어낸 1차의 "두려움 → 해결책" 구조를 설명회 형태로 확장합니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="compare-table">
+      <table>
+        <thead>
+          <tr><th>지표</th><th>1차 (수능이 두려운 너에게)</th><th>2차 (D-1 단기)</th><th>변화율</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="metric-name">광고비</td><td class="value">173,437원</td><td class="value">23,063원</td><td class="delta neutral">−86.7% (의도된 감소)</td></tr>
+          <tr><td class="metric-name">조회수</td><td class="value">29,000</td><td class="value">3,033</td><td class="delta down">▼ 89.5%</td></tr>
+          <tr><td class="metric-name">공유</td><td class="value">32</td><td class="value">2</td><td class="delta down">▼ 93.8%</td></tr>
+          <tr><td class="metric-name">웹사이트 방문</td><td class="value">769</td><td class="value">50</td><td class="delta down">▼ 93.5%</td></tr>
+          <tr class="highlight"><td class="metric-name">실제 신청</td><td class="value">3팀</td><td class="value">0팀</td><td class="delta down">▼ 100%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight-note">
+      <strong>추이 해석</strong>
+      광고비 감소 비율(-86.7%)보다 조회수·공유·웹방문 감소 비율(-89.5% ~ -93.8%)이 더 가파릅니다. 즉 광고비 대비 효율 자체도 떨어진 것으로 보입니다. 가장 결정적인 차이는 신청 3팀 → 0팀입니다. 단기 마감 메시지는 "관심"은 만들었지만 "신청"을 만들지 못했습니다. 다음 3차(7월 8일) 약술 영상은 1차의 신청 성공 패턴("두려움 → 해결책")을 유지하면서, 설명회 형식으로 신뢰감을 추가하는 방향이 합리적일 것 같습니다.
+    </div>
+  </section>
+
+  <!-- 아하포인트 -->
+  <section class="cat-section" id="aha">
+    <div class="cat-header">
+      <h2>💡 아하포인트 (오가닉)</h2>
+      <span class="count">총 2편 · 신규 게시물 추가 예정</span>
+    </div>
+
+    <div class="trend-row">
+      <div class="trend-card organic">
+        <span class="seq-tag">1차</span>
+        <div class="thumb"><img src="thumb_임재혁.png" alt="임재혁 아하포인트"></div>
+        <div class="info">
+          <div class="title">부명고 1학년 임재혁</div>
+          <div class="sub">"같은 시간을 공부해도 성적이 다른 이유"</div>
+          <div class="stats">
+            <div class="row"><span class="k">조회수</span><span class="v">23,266</span></div>
+            <div class="row"><span class="k">좋아요</span><span class="v">57</span></div>
+            <div class="row"><span class="k">댓글</span><span class="v">0</span></div>
+            <div class="row"><span class="k">공유</span><span class="v">655</span></div>
+            <div class="row"><span class="k">저장</span><span class="v">7</span></div>
+            <div class="row"><span class="k">프로필 방문</span><span class="v">141</span></div>
+            <div class="row"><span class="k">신규 팔로우</span><span class="v signup">+1</span></div>
+            <div class="row"><span class="k">피드 출처</span><span class="v">94.7%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trend-card organic">
+        <span class="seq-tag">2차</span>
+        <div class="thumb"><img src="thumb_김서연.png" alt="김서연 아하포인트"></div>
+        <div class="info">
+          <div class="title">중원고 3학년 김서연</div>
+          <div class="sub">"공부를 오래 한다고 성적이 오르는 건 아닙니다"</div>
+          <div class="stats">
+            <div class="row"><span class="k">조회수</span><span class="v">8,779</span></div>
+            <div class="row"><span class="k">좋아요</span><span class="v">26</span></div>
+            <div class="row"><span class="k">댓글</span><span class="v">0</span></div>
+            <div class="row"><span class="k">공유</span><span class="v">109</span></div>
+            <div class="row"><span class="k">저장</span><span class="v">2</span></div>
+            <div class="row"><span class="k">프로필 방문</span><span class="v">90</span></div>
+            <div class="row"><span class="k">신규 팔로우</span><span class="v signup">+1</span></div>
+            <div class="row"><span class="k">피드 출처</span><span class="v">86.4%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trend-card placeholder">
+        <span class="seq-tag">3차 예정</span>
+        <div>
+          <strong style="display:block; color:#374151; margin-bottom:6px;">제작 예정 (날짜 미정)</strong>
+          현재 인스타그램에서 유행하는 릴스·후킹 레퍼런스를 먼저 조사한 뒤,<br>
+          그 포맷을 그대로 차용해 학생 인터뷰 형식으로 진행해볼 예정입니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="compare-table">
+      <table>
+        <thead>
+          <tr><th>지표</th><th>1차 (임재혁)</th><th>2차 (김서연)</th><th>변화율</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="metric-name">조회수</td><td class="value">23,266</td><td class="value">8,779</td><td class="delta down">▼ 62.3%</td></tr>
+          <tr><td class="metric-name">좋아요</td><td class="value">57</td><td class="value">26</td><td class="delta down">▼ 54.4%</td></tr>
+          <tr><td class="metric-name">공유</td><td class="value">655</td><td class="value">109</td><td class="delta down">▼ 83.4%</td></tr>
+          <tr><td class="metric-name">저장</td><td class="value">7</td><td class="value">2</td><td class="delta down">▼ 71.4%</td></tr>
+          <tr><td class="metric-name">프로필 방문</td><td class="value">141</td><td class="value">90</td><td class="delta down">▼ 36.2%</td></tr>
+          <tr><td class="metric-name">프로필 방문/조회</td><td class="value">0.61%</td><td class="value">1.03%</td><td class="delta up">▲ +0.42%p</td></tr>
+          <tr><td class="metric-name">팔로우 증가</td><td class="value">+1</td><td class="value">+1</td><td class="delta neutral">동일</td></tr>
+          <tr><td class="metric-name">피드 출처 비중</td><td class="value">94.7%</td><td class="value">86.4%</td><td class="delta down">▼ 8.3%p</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight-note">
+      <strong>추이 해석</strong>
+      전체 도달은 임재혁 영상이 압도적입니다 (조회 약 2.6배, 공유 약 6배). 인스타그램 알고리즘이 1차 영상을 더 강하게 밀어준 결과로 보입니다. 그러나 <strong>프로필 방문/조회 비율은 김서연 영상이 1.03%로 임재혁(0.61%)보다 1.7배 우수</strong>합니다. 즉 1차는 "도달 폭", 2차는 "도달 깊이"의 강점이 다릅니다. 피드 출처 비중이 8.3%p 감소한 점은 알고리즘 추천 강도가 줄었음을 의미하므로, 3차에서는 유행 릴스 포맷을 차용해 알고리즘 추천을 다시 끌어올리는 시도가 의미가 있을 것 같습니다.
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
