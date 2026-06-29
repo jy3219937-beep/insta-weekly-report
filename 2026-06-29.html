@@ -356,9 +356,49 @@
   .top-nav a:hover { background: #f3f4f6; }
   .top-nav a.active { background: #4f46e5; color: #fff; }
 
+  /* Week selector */
+  .week-selector {
+    background: #fff;
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .week-selector button {
+    background: #f3f4f6;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+  }
+  .week-selector button:hover:not(:disabled) { background: #e5e7eb; }
+  .week-selector button:disabled { opacity: 0.35; cursor: not-allowed; }
+  .week-selector select {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    cursor: pointer;
+    min-width: 220px;
+    text-align: center;
+    text-align-last: center;
+  }
+  .week-selector select:focus { outline: 2px solid #4f46e5; outline-offset: 1px; }
+
   @media print {
     body { background: #fff; padding: 0; }
     .top-nav { display: none; }
+    .week-selector { display: none; }
     .video-card, .summary, .report-footer { box-shadow: none; border: 1px solid #e5e7eb; }
   }
   @media (max-width: 768px) {
@@ -375,6 +415,12 @@
   <div class="top-nav">
     <a href="index.html" class="active">📊 이번 주 보고서</a>
     <a href="trends.html">📈 카테고리별 추이</a>
+  </div>
+
+  <div class="week-selector">
+    <button id="prev-week" type="button">← 지난 주</button>
+    <select id="week-dropdown" aria-label="주차 선택"></select>
+    <button id="next-week" type="button">다음 주 →</button>
   </div>
 
   <div class="report-header">
@@ -885,5 +931,40 @@
   </div>
 
 </div>
+
+<script src="weeks.js"></script>
+<script>
+(function(){
+  const weeks = window.WEEKS || [];
+  const select = document.getElementById('week-dropdown');
+  const prev = document.getElementById('prev-week');
+  const next = document.getElementById('next-week');
+  if (!weeks.length || !select) return;
+
+  const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  const isIndex = path === '' || path === 'index.html';
+  let current = isIndex ? weeks.length - 1 : weeks.findIndex(w => w.file.toLowerCase() === path);
+  if (current === -1) current = weeks.length - 1;
+
+  weeks.forEach((w, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = w.label + (i === weeks.length - 1 ? ' (이번 주)' : '');
+    select.appendChild(opt);
+  });
+  select.value = current;
+
+  function gotoIndex(idx) {
+    location.href = (idx === weeks.length - 1) ? 'index.html' : weeks[idx].file;
+  }
+  select.addEventListener('change', e => gotoIndex(parseInt(e.target.value, 10)));
+
+  if (current <= 0) prev.disabled = true;
+  else prev.addEventListener('click', () => gotoIndex(current - 1));
+
+  if (current >= weeks.length - 1) next.disabled = true;
+  else next.addEventListener('click', () => gotoIndex(current + 1));
+})();
+</script>
 </body>
 </html>
